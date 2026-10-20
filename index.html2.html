@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="cs" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Povinné neindexování ve vyhledávačích podle zadání -->
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Digitální vizitka</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <!-- Tailwind CSS z CDN pro rychlý a moderní design -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <style>
+    body {
+      background-image:
+        radial-gradient(ellipse at 15% 0%, rgba(8, 145, 178, 0.16), transparent 36rem),
+        radial-gradient(ellipse at 90% 30%, rgba(79, 70, 229, 0.14), transparent 34rem);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    html.intro-active {
+      overflow: hidden;
+    }
+
+    .intro-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 45%, rgba(34, 211, 238, 0.18), transparent 45%),
+        #020617;
+      opacity: 1;
+      transition: opacity 450ms ease;
+    }
+
+    html:not(.js) .intro-splash,
+    .intro-splash.is-hidden {
+      display: none;
+    }
+
+    .intro-splash.is-leaving {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-frog {
+      position: absolute;
+      top: 65%;
+      left: -12vw;
+      font-size: clamp(4rem, 12vw, 8rem);
+      line-height: 1;
+      filter: drop-shadow(0 0 24px rgba(34, 211, 238, 0.45));
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: default;
+      animation: frog-hop 1800ms ease-in-out forwards;
+    }
+
+    .intro-frog.is-returning {
+      animation: frog-hop-to-center 1800ms ease-in-out forwards;
+    }
+
+    .intro-frog.is-ready {
+      cursor: pointer;
+    }
+
+    .intro-frog.is-ready > span {
+      display: inline-block;
+      animation: frog-pulse 900ms ease-in-out infinite alternate;
+    }
+
+    .intro-frog.is-ready:focus-visible {
+      outline: 3px solid #22d3ee;
+      outline-offset: 8px;
+      border-radius: 50%;
+    }
+
+    .intro-hint {
+      position: absolute;
+      top: calc(48% - 5.5rem);
+      left: 50%;
+      padding: 0.65rem 1.15rem;
+      border: 1px solid rgba(103, 232, 249, 0.35);
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.72);
+      box-shadow: 0 8px 32px rgba(34, 211, 238, 0.18);
+      color: #a5f3fc;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, 0.5rem);
+      transition: opacity 350ms ease, transform 350ms ease;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .intro-hint.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0);
+    }
+
+    .intro-letter {
+      display: inline-block;
+      opacity: 0;
+      animation: letter-pop 400ms ease-out forwards;
+    }
+
+    .intro-name-letter {
+      color: transparent;
+      background-image: linear-gradient(to right, #06b6d4, #6366f1);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    @keyframes frog-hop {
+      0% {
+        left: -12vw;
+        top: 65%;
+        transform: rotate(0);
+      }
+      42% {
+        top: 28%;
+        transform: rotate(-12deg);
+      }
+      78% {
+        top: 65%;
+      }
+      100% {
+        left: 110vw;
+        top: 65%;
+        transform: rotate(10deg);
+      }
+    }
+
+    @keyframes frog-hop-to-center {
+      0% {
+        left: -12vw;
+        top: 65%;
+        transform: rotate(0);
+      }
+      42% {
+        top: 28%;
+        transform: rotate(-12deg);
+      }
+      100% {
+        left: 50%;
+        top: 48%;
+        transform: translateX(-50%) rotate(0);
+      }
+    }
+
+    @keyframes frog-pulse {
+      from {
+        transform: scale(1);
+        filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.45));
+      }
+      to {
+        transform: scale(1.18);
+        filter: drop-shadow(0 0 38px rgba(34, 211, 238, 0.9));
+      }
+    }
+
+    @keyframes letter-pop {
+      from {
+        opacity: 0;
+        transform: translateY(0.5em) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .intro-splash {
+        transition: none;
+      }
+
+      .intro-frog,
+      .intro-letter {
+        animation: none;
+      }
+
+      .intro-letter {
+        opacity: 1;
+      }
+
+      .intro-frog {
+        animation: none;
+        left: 50%;
+        top: 48%;
+        transform: translateX(-50%);
+      }
+
+      .intro-frog.is-ready > span {
+        animation: none;
+      }
+
+      .intro-hint {
+        transition: none;
+      }
+    }
+
+    html.js .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+
+    html.js .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .theme-icon {
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+
+    .sun-icon {
+      color: #facc15;
+      filter: drop-shadow(0 0 7px rgba(250, 204, 21, 0.85));
+    }
+
+    .moon-icon {
+      color: #fff;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.4));
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html.js .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-sans min-h-screen">
+
+  <div id="intro-splash" class="intro-splash">
+    <span id="intro-hint" class="intro-hint" data-en="Click here">Klikni zde</span>
+    <button id="intro-frog" class="intro-frog" type="button" disabled aria-label="Klikni na žábu pro otevření webu" data-en-aria-label="Click the frog to open the website"><span>🐸</span></button>
+  </div>
+
+  <!-- Navigace a tlačítko na přepínání režimu -->
+  <header class="sticky top-0 bg-white/75 dark:bg-slate-950/75 backdrop-blur-xl border-b border-slate-200/70 dark:border-white/10 z-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center gap-4">
+      <a href="#uvod" class="font-bold tracking-tight text-lg flex items-center gap-2">
+        <img src="logo.jpg" alt="" class="w-8 h-8 rounded-xl object-cover">
+        <span>Daniel Pulec</span>
+      </a>
+      <nav aria-label="Hlavní navigace" data-en-aria-label="Main navigation" class="hidden md:flex items-center gap-5 text-sm text-slate-600 dark:text-slate-300">
+        <a href="#o-mne" class="hover:text-cyan-500 transition" data-en="About">O mně</a>
+        <a href="#dovednosti" class="hover:text-cyan-500 transition" data-en="Skills">Dovednosti</a>
+        <a href="#projekty" class="hover:text-cyan-500 transition" data-en="Projects">Projekty</a>
+        <a href="#kontakt" class="hover:text-cyan-500 transition" data-en="Contact">Kontakt</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/10 p-1 text-xs font-bold" role="group" aria-label="Jazyk stránky" data-en-aria-label="Page language">
+          <button id="language-cs" type="button" aria-pressed="true" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm">CZ</button>
+          <button id="language-en" type="button" aria-pressed="false" class="px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400">EN</button>
+        </div>
+        <button id="theme-toggle" type="button" aria-label="Přepnout na světlý režim" data-en-aria-label="Switch to light mode" aria-pressed="true" class="grid place-items-center bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 border border-slate-200 dark:border-white/10 w-10 h-10 rounded-xl transition">
+          <svg class="theme-icon sun-icon block dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+          </svg>
+          <svg class="theme-icon moon-icon hidden dark:block" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M21 15.2A8.5 8.5 0 0 1 8.8 3 8.5 8.5 0 1 0 21 15.2Z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-10 md:py-14 space-y-8 md:space-y-10">
+
+    <!-- 1. Úvodní představení -->
+    <section id="uvod" class="reveal relative overflow-hidden text-center py-14 md:py-20 bg-white/80 dark:bg-slate-900/70 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-200 dark:border-white/10 px-6">
+      <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-cyan-400/20 dark:bg-cyan-400/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative">
+        <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.18em] text-cyan-800 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-400/10 border border-cyan-200 dark:border-cyan-300/20 mb-5">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> <span data-en="Personal portfolio">Osobní portfolio</span>
+        </p>
+        <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-4"><span id="intro-greeting" data-en="Hi, I'm">Ahoj, já jsem</span> <span id="intro-name">Daniel Pulec</span></h1>
+        <p id="intro-subtitle" class="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium mb-4" data-en="4th-year student">Student 4. ročníku</p>
+        <p class="max-w-2xl mx-auto text-slate-500 dark:text-slate-400" data-en="“Where there’s a will, there’s a way.”">“Všechno jde, když se chce.”</p>
+        <a href="#o-mne" class="inline-flex mt-8 items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-5 py-3 rounded-xl shadow-lg shadow-cyan-500/20 transition"><span data-en="Get to know me">Poznej mě</span> <span aria-hidden="true">↓</span></a>
+      </div>
+    </section>
+
+    <!-- 2. O mně -->
+    <section id="o-mne" class="reveal bg-white/80 dark:bg-slate-900/70 rounded-3xl shadow-lg shadow-slate-200/40 dark:shadow-black/15 border border-slate-200 dark:border-white/10 p-6 md:p-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-5 pb-3 border-b border-slate-200 dark:border-white/10" data-en="About me">O mně</h2>
+      <p class="leading-relaxed" data-en="I am a student at a secondary technical school. I enjoy combat sports, strength training, and motorcycles. In my free time, I practice combat sports, work out, ride motorcycles with friends, and work as an electrician on construction sites.">
+        Jsem student střední průmyslové školy a baví mě bojové sporty, posilování a motorky. Ve volném čase se věnuji bojovým sportům, posilování, ježdění s kamarády na motorce a pracování
+        na stavbě jako elektrikář.
+      </p>
+      <img src="Image (10).jpg"
+           alt="Daniel s týmem bojových sportů" data-en-alt="Daniel with his combat sports team"
+           class="mt-6 w-full max-w-sm h-auto mx-auto rounded-2xl shadow-lg border border-slate-200 dark:border-white/10">
+    </section>
+
+    <!-- 3. Moje dovednosti -->
+    <section id="dovednosti" class="reveal bg-white/80 dark:bg-slate-900/70 rounded-3xl shadow-lg shadow-slate-200/40 dark:shadow-black/15 border border-slate-200 dark:border-white/10 p-6 md:p-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-5 pb-3 border-b border-slate-200 dark:border-white/10" data-en="My skills">Moje dovednosti</h2>
+      <div class="flex flex-wrap gap-2">
+        <span class="bg-cyan-50 dark:bg-cyan-400/10 text-cyan-800 dark:text-cyan-200 border border-cyan-200 dark:border-cyan-300/20 px-4 py-2 rounded-xl text-sm font-medium">Excel</span>
+        <span class="bg-indigo-50 dark:bg-indigo-400/10 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-300/20 px-4 py-2 rounded-xl text-sm font-medium">Word</span>
+        <span class="bg-emerald-50 dark:bg-emerald-400/10 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-300/20 px-4 py-2 rounded-xl text-sm font-medium" data-en="English">Anglický jazyk</span>
+        <span class="bg-violet-50 dark:bg-violet-400/10 text-violet-800 dark:text-violet-200 border border-violet-200 dark:border-violet-300/20 px-4 py-2 rounded-xl text-sm font-medium" data-en="Residential electrical wiring">Zapojování elektroinstalací v domácnostech</span>
+      </div>
+    </section>
+
+    <!-- 4. Moje projekty a úspěchy -->
+    <section id="projekty" class="reveal bg-white/80 dark:bg-slate-900/70 rounded-3xl shadow-lg shadow-slate-200/40 dark:shadow-black/15 border border-slate-200 dark:border-white/10 p-6 md:p-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-5 pb-3 border-b border-slate-200 dark:border-white/10" data-en="My projects and achievements">Moje projekty a úspěchy</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- Projekt 1 -->
+        <div class="reveal p-5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] hover:border-cyan-400/60 transition-colors">
+          <h3 class="font-bold text-lg mb-2" data-en="Design and complete electrical installation of two family homes">Návrh a kompletní zapojení elektroinstalace dvou rodinných domů</h3>
+          <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300" data-en="The design included detailed lighting and socket circuits, switch and terminal placement, and a complete switchboard plan with circuit breaker and protective device sizing.">
+            Návrh zahrnoval detailní zapojení světelných a zásuvkových okruhů, rozmístění vypínačů, koncových prvků a kompletní návrh rozvaděče včetně dimenzování jističů
+            a ochranných prvků.
+          </p>
+          <img src="Image (7).jpg"
+               alt="Elektroinstalace a pracovník při realizaci projektu" data-en-alt="Electrical installation work in progress"
+               class="mt-4 w-full rounded-xl border border-slate-200 dark:border-white/10">
+        </div>
+        <!-- Projekt 2 -->
+        <div class="reveal p-5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03] hover:border-cyan-400/60 transition-colors">
+          <h3 class="font-bold text-lg mb-2" data-en="Combat sports achievements">Úspěchy v bojových sportech</h3>
+          <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300" data-en="Winner of the Czech national boxing championship in 2020 and runner-up at the Czech national K-1 championship in 2022.">
+            Výhra na mčr v boxu 2020 a 2. místo na mčr v K-1 2022.
+          </p>
+          <img src="Image (8).jpg"
+               alt="Úspěchy v bojových sportech" data-en-alt="Combat sports achievements"
+               class="mt-4 w-full rounded-xl border border-slate-200 dark:border-white/10">
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Moje budoucnost -->
+    <section class="reveal bg-white/80 dark:bg-slate-900/70 rounded-3xl shadow-lg shadow-slate-200/40 dark:shadow-black/15 border border-slate-200 dark:border-white/10 p-6 md:p-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-5 pb-3 border-b border-slate-200 dark:border-white/10" data-en="My future">Moje budoucnost</h2>
+      <p class="leading-relaxed" data-en="After graduating, I would like to study electrical engineering at university in Pardubice and earn the professional qualification under Czech regulation No. 194/2022 Coll. I also plan to continue combat sports and strength training, and earn a boxing coach's licence in the future.">
+        Po úspěšném dokončení maturity bych se chtěl věnovat studiu na vysoké škole v Pardubicích, zaměřené na elektrotechniku, a také si udělat vyhlášku č. 194/2022 Sb. 
+        Nadále se chci věnovat bojovým sportům a posilování. V budoucnu si mám v plánu udělat trenérskou licenci boxu.
+      </p>
+    </section>
+
+    <!-- 6. Kontakt -->
+    <section id="kontakt" class="reveal text-center bg-gradient-to-br from-cyan-50 to-indigo-50 dark:from-cyan-950/50 dark:to-indigo-950/50 rounded-3xl shadow-lg border border-cyan-200 dark:border-white/10 p-7 md:p-10">
+      <h2 class="text-2xl md:text-3xl font-bold mb-3" data-en="Contact">Kontakt</h2>
+      <p class="mb-5 text-slate-600 dark:text-slate-300" data-en="Find me on GitHub:">Najdeš mě na GitHubu:</p>
+      <a href="https://github.com/DanPul27" target="_blank" rel="noopener noreferrer" class="inline-block bg-slate-900 dark:bg-cyan-400 hover:bg-slate-700 dark:hover:bg-cyan-300 text-white dark:text-slate-950 font-bold px-5 py-3 rounded-xl shadow-lg transition">
+        <span data-en="My GitHub profile">Můj GitHub profil</span>
+      </a>
+    </section>
+
+  </main>
+
+  <footer class="reveal text-center py-8 text-sm text-slate-500 dark:text-slate-500">
+    <span data-en="© 2026 Digital portfolio | Created as a school project">© 2026 Digitální vizitka | Vytvořeno v rámci školního projektu</span>
+  </footer>
+
+  <!-- JavaScript pro interaktivní prvek (přepínání tmavého a světlého režimu) -->
+  <script>
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const languageCsBtn = document.getElementById('language-cs');
+    const languageEnBtn = document.getElementById('language-en');
+    const introSplash = document.getElementById('intro-splash');
+    const introFrog = document.getElementById('intro-frog');
+    const introHint = document.getElementById('intro-hint');
+    const introGreeting = document.getElementById('intro-greeting');
+    const introName = document.getElementById('intro-name');
+    const introSubtitle = document.getElementById('intro-subtitle');
+    const introPageElements = Array.from(document.body.children).filter((element) => element !== introSplash);
+    let introFinished = false;
+
+    document.querySelectorAll('[data-en]').forEach((element) => {
+      element.dataset.csText = element.textContent;
+    });
+    document.querySelectorAll('[data-en-aria-label]').forEach((element) => {
+      element.dataset.csAriaLabel = element.getAttribute('aria-label');
+    });
+    document.querySelectorAll('[data-en-alt]').forEach((element) => {
+      element.dataset.csAlt = element.alt;
+    });
+
+    function updateThemeButton(isDark) {
+      themeToggleBtn.setAttribute('aria-pressed', String(isDark));
+      const language = document.documentElement.lang;
+      themeToggleBtn.setAttribute(
+        'aria-label',
+        isDark
+          ? (language === 'en' ? 'Switch to light mode' : 'Přepnout na světlý režim')
+          : (language === 'en' ? 'Switch to dark mode' : 'Přepnout na tmavý režim')
+      );
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateThemeButton(isDark);
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    }
+
+    function setLanguage(language) {
+      const isEnglish = language === 'en';
+      document.documentElement.lang = language;
+      document.querySelectorAll('[data-en]').forEach((element) => {
+        element.textContent = isEnglish ? element.dataset.en : element.dataset.csText;
+      });
+      if (introFinished) {
+        introSubtitle.setAttribute('aria-label', introSubtitle.textContent);
+      }
+      document.querySelectorAll('[data-en-aria-label]').forEach((element) => {
+        element.setAttribute('aria-label', isEnglish ? element.dataset.enAriaLabel : element.dataset.csAriaLabel);
+      });
+      document.querySelectorAll('[data-en-alt]').forEach((element) => {
+        element.alt = isEnglish ? element.dataset.enAlt : element.dataset.csAlt;
+      });
+      document.title = isEnglish ? 'Digital portfolio' : 'Digitální vizitka';
+      languageCsBtn.setAttribute('aria-pressed', String(!isEnglish));
+      languageEnBtn.setAttribute('aria-pressed', String(isEnglish));
+      languageCsBtn.classList.toggle('bg-white', !isEnglish);
+      languageCsBtn.classList.toggle('dark:bg-slate-700', !isEnglish);
+      languageCsBtn.classList.toggle('shadow-sm', !isEnglish);
+      languageEnBtn.classList.toggle('bg-white', isEnglish);
+      languageEnBtn.classList.toggle('dark:bg-slate-700', isEnglish);
+      languageEnBtn.classList.toggle('shadow-sm', isEnglish);
+      languageCsBtn.classList.toggle('text-slate-500', isEnglish);
+      languageCsBtn.classList.toggle('dark:text-slate-400', isEnglish);
+      languageEnBtn.classList.toggle('text-slate-500', !isEnglish);
+      languageEnBtn.classList.toggle('dark:text-slate-400', !isEnglish);
+      updateThemeButton(document.documentElement.classList.contains('dark'));
+      localStorage.setItem('language', language);
+    }
+
+    languageCsBtn.addEventListener('click', () => setLanguage('cs'));
+    languageEnBtn.addEventListener('click', () => setLanguage('en'));
+    setLanguage(localStorage.getItem('language') === 'en' ? 'en' : 'cs');
+
+    function animateLetters(element, text, delayOffset, isName = false) {
+      element.textContent = '';
+      element.setAttribute('aria-label', text);
+      Array.from(text).forEach((character, index) => {
+        const letter = document.createElement('span');
+        letter.className = isName ? 'intro-letter intro-name-letter' : 'intro-letter';
+        letter.style.animationDelay = `${delayOffset + index * 55}ms`;
+        letter.textContent = character === ' ' ? '\u00a0' : character;
+        element.appendChild(letter);
+      });
+    }
+
+    function animateIntroduction() {
+      const greeting = introGreeting.textContent;
+      const name = introName.textContent;
+      const greetingLength = Array.from(greeting).length;
+      const nameLength = Array.from(name).length;
+      animateLetters(introGreeting, greeting, 0);
+      animateLetters(introName, name, greetingLength * 55, true);
+      animateLetters(introSubtitle, introSubtitle.textContent, (greetingLength + nameLength) * 55);
+    }
+
+    function finishIntro() {
+      if (introFinished) {
+        return;
+      }
+      introFinished = true;
+      document.documentElement.classList.remove('intro-active');
+      introPageElements.forEach((element) => {
+        element.inert = false;
+      });
+      animateIntroduction();
+      introSplash.classList.add('is-leaving');
+      window.setTimeout(() => {
+        introSplash.classList.add('is-hidden');
+      }, 450);
+    }
+
+    introFrog.addEventListener('animationend', (event) => {
+      if (event.animationName === 'frog-hop') {
+        introFrog.classList.add('is-returning');
+      } else if (event.animationName === 'frog-hop-to-center') {
+        introFrog.disabled = false;
+        introFrog.classList.add('is-ready');
+        introSplash.classList.add('is-ready');
+        introHint.classList.add('is-visible');
+      }
+    });
+    introFrog.addEventListener('click', finishIntro);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      introFrog.disabled = false;
+      introFrog.classList.add('is-ready');
+      introSplash.classList.add('is-ready');
+      introHint.classList.add('is-visible');
+    } else {
+      introPageElements.forEach((element) => {
+        element.inert = true;
+      });
+      document.documentElement.classList.add('intro-active');
+    }
+
+    const revealElements = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      revealElements.forEach((element) => revealObserver.observe(element));
+    } else {
+      revealElements.forEach((element) => element.classList.add('is-visible'));
+    }
+  </script>
+
+</body>
+</html>
